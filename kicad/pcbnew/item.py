@@ -53,6 +53,32 @@ class HasPosition(object):
     def y(self, value):
         self.position = (self.x, value)
 
+class HasKnockout(object):
+    """Board items that has knockout property should inherit this."""
+    def __init__(self):
+        raise NotImplementedError("This is an abstract class!")
+
+    @property
+    def knockout(self):
+        return bool(self._obj.IsKnockout())
+
+    @knockout.setter
+    def knockout(self, value):
+        self._obj.SetIsKnockout(value)
+
+class HasFilled(object):
+    """Board items that has filled property should inherit this."""
+    def __init__(self):
+        raise NotImplementedError("This is an abstract class!")
+
+    @property
+    def filled(self):
+        return bool(self._obj.IsFilled())
+
+    @filled.setter
+    def filled(self, value):
+        self._obj.SetFilled(value)
+
 
 class HasRotation(object):
     """Board items that has rotation property should inherit this."""

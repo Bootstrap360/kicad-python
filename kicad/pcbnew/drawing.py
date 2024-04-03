@@ -6,7 +6,7 @@ import kicad
 from kicad.pcbnew import layer as pcbnew_layer
 from kicad.point import Point
 from kicad import units, Size, SWIGtype, SWIG_version
-from kicad.pcbnew.item import HasLayerStrImpl, Selectable, HasPosition, HasWidth, BoardItem, TextEsque
+from kicad.pcbnew.item import HasLayerStrImpl, Selectable, HasPosition, HasWidth, BoardItem, TextEsque, HasKnockout, HasFilled
 
 class ShapeType():
     Segment = pcbnew.S_SEGMENT
@@ -84,9 +84,9 @@ class Segment(Drawing):
         self._obj.SetEnd(Point.native_from(value))
 
 
-class Circle(Drawing):
+class Circle(Drawing, HasFilled):
     def __init__(self, center, radius, layer='F.SilkS', width=0.15,
-                 board=None):
+                 board=None, filled=False):
         circle = SWIGtype.Shape(board and board.native_obj)
         circle.SetShape(ShapeType.Circle)
         circle.SetCenter(Point.native_from(center))
@@ -100,6 +100,7 @@ class Circle(Drawing):
         circle.SetLayer(pcbnew_layer.get_board_layer_id(board, layer))
         circle.SetWidth(int(width * units.DEFAULT_UNIT_IUS))
         self._obj = circle
+        self.filled = filled
 
     @property
     def center(self):
@@ -263,9 +264,9 @@ else:
     Arc = Arc_v5
 
 
-class Polygon(Drawing):
+class Polygon(Drawing, HasFilled):
     def __init__(self, coords,
-                 layer='F.SilkS', width=0.15, board=None):
+                 layer='F.SilkS', width=0.15, board=None, filled=False):
         poly_obj = SWIGtype.Shape(board and board.native_obj)
         poly_obj.SetShape(ShapeType.Polygon)
         self._obj = poly_obj
@@ -279,14 +280,7 @@ class Polygon(Drawing):
 
         self.layer = layer
         self.width = width
-
-    @property
-    def filled(self):
-        return self._obj.IsFilled()
-
-    @filled.setter
-    def filled(self, value=True):
-        self._obj.SetFilled(value)
+        self.filled = filled
 
     def get_vertices(self):
         poly = self._obj.GetPolyShape()
@@ -398,9 +392,9 @@ class Rectangle(Polygon):
         return poly.contains(point)
 
 
-class TextPCB(Drawing, TextEsque):
+class TextPCB(Drawing, TextEsque, HasKnockout):
     def __init__(self, position, text=None, layer='F.SilkS',
-                 size=1.0, thickness=0.15, board=None):
+                 size=1.0, thickness=0.15, board=None, knockout=False):
         self._obj = SWIGtype.Text(board and board.native_obj)
         self.position = position
         if text:
@@ -408,3 +402,4 @@ class TextPCB(Drawing, TextEsque):
         self.layer = layer
         self.size = size
         self.thickness = thickness
+        self.knockout = knockout
