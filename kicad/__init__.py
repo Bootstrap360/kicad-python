@@ -43,22 +43,48 @@ if pcbnew_bare is None:
 else:
     # Determine version and map equivalent objects into consistent names
     try:
-        ver = tuple(int(x) for x in pcbnew_bare.GetMajorMinorVersion().split('.'))
+        pcb_new_version = tuple(
+            int(x) for x in pcbnew_bare.GetMajorMinorVersion().split(".")
+        )
     except AttributeError:
-        ver = (5, 0)
-    if len(ver) < 2:
-        ver = (5, 0)
-    if ver[0] == 7 or (ver[0] == 6 and ver[1] == 99):
+        pcb_new_version = (5, 0)
+    if len(pcb_new_version) < 2:
+        pcb_new_version = (5, 0)
+    if pcb_new_version[0] == 8 or (
+        pcb_new_version[0] == 7 and pcb_new_version[1] == 99
+    ):
+        SWIG_version = 8
+    elif pcb_new_version[0] == 7 or (
+        pcb_new_version[0] == 6 and pcb_new_version[1] == 99
+    ):
         SWIG_version = 7
-    elif ver[0] == 6 or (ver[0] == 5 and ver[1] == 99):
+    elif pcb_new_version[0] == 6 or (
+        pcb_new_version[0] == 5 and pcb_new_version[1] == 99
+    ):
         SWIG_version = 6
-    elif ver[0] == 5 or (ver[0] == 4 and ver[1] == 99):
+    elif pcb_new_version[0] == 5 or (
+        pcb_new_version[0] == 4 and pcb_new_version[1] == 99
+    ):
         SWIG_version = 5
     else:
-        print('Version {} not supported by kicad-python. Some functionality might not work')
-        SWIG_version = 7 if ver[0] > 7 else 5
+        print(
+            f"Version {pcb_new_version} not supported by kicad-python. Some functionality might not work"
+        )
+        SWIG_version = 7 if pcb_new_version[0] > 7 else 5
 
-    if SWIG_version == 7:
+    if SWIG_version == 8:
+        class SWIGtype:
+            Zone = pcbnew_bare.ZONE
+            Track = pcbnew_bare.PCB_TRACK
+            Via = pcbnew_bare.PCB_VIA
+            Footprint = pcbnew_bare.FOOTPRINT
+            Shape = pcbnew_bare.PCB_SHAPE
+            Text = pcbnew_bare.PCB_TEXT
+            Footprint = pcbnew_bare.FOOTPRINT
+            Point = pcbnew_bare.VECTOR2I
+            Size = pcbnew_bare.VECTOR2I
+            Rect = pcbnew_bare.BOX2I
+    elif SWIG_version == 7:
         class SWIGtype:
             Zone = pcbnew_bare.ZONE
             Track = pcbnew_bare.PCB_TRACK
